@@ -1,0 +1,14 @@
+{
+  "success": true,
+  "timestamp": 1363478399,
+  "historical": true,
+  "base": "EUR",
+  "date": "2013-03-16",
+  "rates": {
+    "USD": 1.307716,
+    "AUD": 1.256333,
+    "CAD": 1.333812,
+    "PLN": 4.150819,
+    "MXN": 16.259128
+  }
+}

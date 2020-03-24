@@ -1,0 +1,38 @@
+{
+  "info": {
+    "_postman_id": "5c98202f-54ce-421d-a0a4-41f734d1496d",
+    "name": "CurrencyUtilities",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "CurrencyConvertor",
+      "item": [
+        {
+          "name": "getAvailableCurrencies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:5000/api/currency/converter/currencies",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "5000",
+              "path": [
+                "api",
+                "currency",
+                "converter",
+                "currencies"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "protocolProfileBehavior": {}
+    }
+  ],
+  "protocolProfileBehavior": {}
+}
