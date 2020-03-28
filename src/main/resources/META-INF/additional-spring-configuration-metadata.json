@@ -1,0 +1,14 @@
+{
+  "properties": [
+    {
+      "name": "currency.api.url",
+      "type": "java.lang.String",
+      "description": "URL for the exhange rate provider"
+    },
+    {
+      "name": "currency.api.allowed-origins",
+      "type": "java.lang.String",
+      "description": "URL for the frontend applications allowed to connect"
+    }
+  ]
+}

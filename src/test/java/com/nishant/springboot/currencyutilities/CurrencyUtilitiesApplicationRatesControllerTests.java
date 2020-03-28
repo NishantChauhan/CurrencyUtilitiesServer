@@ -1,6 +1,6 @@
 package com.nishant.springboot.currencyutilities;
 
-import com.nishant.springboot.currencyutilities.commonutils.RateUtils;
+import com.nishant.springboot.currencyutilities.local.commonutils.RateUtils;
 import com.nishant.springboot.currencyutilities.restcontrollers.feignclients.CurrencyClientInterface;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,7 +26,7 @@ class CurrencyUtilitiesApplicationRatesControllerTests {
     @Test
     public void shouldReturnLatestRates() throws Exception {
         Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
-        this.mockMvc.perform(get("/api/currency/rates/latest"))
+        this.mockMvc.perform(get("/api/v1/currency/rates/latest"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.timestamp").isNumber())

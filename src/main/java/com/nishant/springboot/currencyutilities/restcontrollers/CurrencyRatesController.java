@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/currency/rates")
+@RequestMapping("/api/v1/currency/rates")
 
 public class CurrencyRatesController {
     CurrencyClientInterface currencyFeignClient;

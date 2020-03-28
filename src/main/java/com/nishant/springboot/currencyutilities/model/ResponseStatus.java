@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class ResponseStatus {
-    @NotNull String status;
+    @NotNull
+    String status;
     String errorCode, errorDescription;
 }

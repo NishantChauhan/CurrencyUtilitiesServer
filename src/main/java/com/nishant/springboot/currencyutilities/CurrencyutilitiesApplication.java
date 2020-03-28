@@ -12,5 +12,4 @@ public class CurrencyUtilitiesApplication {
     public static void main(String[] args) {
         SpringApplication.run(CurrencyUtilitiesApplication.class, args);
     }
-
 }

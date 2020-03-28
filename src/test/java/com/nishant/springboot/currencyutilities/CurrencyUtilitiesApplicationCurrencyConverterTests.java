@@ -1,6 +1,6 @@
 package com.nishant.springboot.currencyutilities;
 
-import com.nishant.springboot.currencyutilities.commonutils.RateUtils;
+import com.nishant.springboot.currencyutilities.local.commonutils.RateUtils;
 import com.nishant.springboot.currencyutilities.restcontrollers.feignclients.CurrencyClientInterface;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class CurrencyUtilitiesApplicationCurrencyConvertorTests {
+class CurrencyUtilitiesApplicationCurrencyConverterTests {
     @Autowired
     private MockMvc mockMvc;
 
@@ -27,7 +27,7 @@ class CurrencyUtilitiesApplicationCurrencyConvertorTests {
     @Test
     public void shouldConvert1000CADtoINR() throws Exception {
         Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
-        this.mockMvc.perform(get("/api/currency/converter/convert")
+        this.mockMvc.perform(get("/api/v1/currency/converter/convert")
                 .param("Amount", "1000")
                 .param("From", "CAD")
                 .param("To", "INR")
@@ -36,6 +36,8 @@ class CurrencyUtilitiesApplicationCurrencyConvertorTests {
                 .andExpect(jsonPath("$.from").value("CAD"))
                 .andExpect(jsonPath("$.to").value("INR"))
                 .andExpect(jsonPath("$.amount").value(1000))
+                .andExpect(jsonPath("$.rateAsOf").isNotEmpty())
+                .andExpect(jsonPath("$.conversionRate").value(53.49008750820958))
                 .andExpect(jsonPath("$.result").value(53490.08750820958))
                 .andExpect(jsonPath("$.responseStatus.status").value("Success"))
         ;
@@ -46,7 +48,7 @@ class CurrencyUtilitiesApplicationCurrencyConvertorTests {
         Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
         //noinspection SpellCheckingInspection
         this.mockMvc
-                .perform(get("/api/currency/converter/convert")
+                .perform(get("/api/v1/currency/converter/convert")
                         .param("Amount", "1000")
                         .param("From", "CADA")
                         .param("To", "INR")

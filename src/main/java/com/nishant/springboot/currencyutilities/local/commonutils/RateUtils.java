@@ -1,4 +1,4 @@
-package com.nishant.springboot.currencyutilities.commonutils;
+package com.nishant.springboot.currencyutilities.local.commonutils;
 
 import com.google.gson.GsonBuilder;
 import com.nishant.springboot.currencyutilities.model.Rates;

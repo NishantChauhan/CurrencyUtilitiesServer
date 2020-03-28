@@ -1,5 +1,6 @@
 package com.nishant.springboot.currencyutilities.restcontrollers;
 
+import com.nishant.springboot.currencyutilities.model.APIError;
 import com.nishant.springboot.currencyutilities.model.CurrencyConversionResponse;
 import com.nishant.springboot.currencyutilities.model.Rates;
 import com.nishant.springboot.currencyutilities.model.ResponseStatus;
@@ -12,10 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Date;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/currency/converter")
+@RequestMapping("/api/v1/currency/converter/")
 public class CurrencyConverterController {
 
     CurrencyClientInterface currencyFeignClient;
@@ -27,17 +29,52 @@ public class CurrencyConverterController {
     @GetMapping(value = "/convert", produces = MediaType.APPLICATION_JSON_VALUE)
     public CurrencyConversionResponse getConversionRate(@RequestParam("Amount") String amount, @RequestParam("From") String from, @RequestParam("To") String to) {
         String key = System.getenv("API_KEY");
-        Rates apiRates = currencyFeignClient.getLatestRates(key);
+
+        Double result = 0.0;
+        Double amountValue = 0.0;
+        Date rateAsOf = new Date();
+        Double conversionRate = 0.0;
+
+        Rates apiRates;
+
+        ResponseStatus status = new ResponseStatus();
+        CurrencyConversionResponse response;
+
+        try {
+            apiRates = currencyFeignClient.getLatestRates(key);
+        } catch (Exception e) {
+            status.setStatus("Failed");
+            status.setErrorCode("Error while accessing Currency API");
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            status.setErrorDescription(sw.toString());
+            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
+            return response;
+        }
+        if (apiRates == null) {
+            status.setStatus("Failed");
+            status.setErrorCode("Error while accessing Currency API");
+            status.setErrorDescription("No Response from Currency API");
+            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
+            return response;
+        }
+        APIError error = apiRates.getError();
+        if (error != null) {
+            status.setStatus("Failed");
+            status.setErrorCode(error.getType());
+            status.setErrorDescription(error.getInfo());
+            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
+            return response;
+        }
+        status.setStatus("Success");
 
         Map<String, Double> rates = apiRates.getRates();
 
-        Double result = 0.0;
-        ResponseStatus status = new ResponseStatus();
-        status.setStatus("Success");
 
         Double fromRate = rates.get(from);
         Double toRate = rates.get(to);
-        Double amountValue = 0.0;
+        rateAsOf = apiRates.getDate();
 
         try {
             amountValue = Double.parseDouble(amount);
@@ -49,12 +86,12 @@ public class CurrencyConverterController {
         }
         try {
             result = amountValue * toRate / fromRate;
+            conversionRate = toRate / fromRate;
         } catch (Exception e) {
 
             result = 0.0;
-            String errorCode = "Unknown error";
-            String errorDesc = "Error while converting value";
-
+            String errorCode = null;
+            String errorDesc = null;
 
             if (toRate == null || toRate == 0.0) {
                 errorCode = "Invalid Input";
@@ -66,18 +103,11 @@ public class CurrencyConverterController {
                 errorDesc = "Source Currency '" + from + "' is not supported";
             }
 
-            if (errorDesc == null) {
-                StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                errorDesc = "Error while converting value\n\n" + sw.toString();
-            }
-
             status.setStatus("Failed");
             status.setErrorCode(errorCode);
             status.setErrorDescription(errorDesc);
         }
-        CurrencyConversionResponse response = new CurrencyConversionResponse(from, to, amountValue, result, status);
+        response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
         return response;
     }
 }

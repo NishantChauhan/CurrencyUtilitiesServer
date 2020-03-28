@@ -12,5 +12,6 @@ public class Rates {
     private String base;
     private Date date;
     private Map<String, Double> rates;
+    private APIError error;
 
 }
