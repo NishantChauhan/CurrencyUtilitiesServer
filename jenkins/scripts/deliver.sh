@@ -1,32 +1,10 @@
 #!/usr/bin/env bash
+docker login -u $DOCKER_HUB_CREDS_USR -p $DOCKER_HUB_CREDS_PSW
+# mvn package
+# mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+docker build -t nishantchouhan/currency-utilities-server:latest  .
+docker tag nishantchouhan/currency-utilities-server:latest nishantchouhan/currency-utilities-server:$BUILD_NUMBER
+docker push nishantchouhan/currency-utilities-server:latest
+docker push nishantchouhan/currency-utilities-server:$BUILD_NUMBER
+docker logout
 
-echo 'The following Maven command installs your Maven-built Java application'
-echo 'into the local Maven repository, which will ultimately be stored in'
-echo 'Jenkins''s local Maven repository (and the "maven-repository" Docker data'
-echo 'volume).'
-set -x
-mvn jar:jar install:install help:evaluate -Dexpression=project.name
-# set +x
-
-# echo 'The following complex command extracts the value of the <name/> element'
-# echo 'within <project/> of your Java/Maven project''s "pom.xml" file.'
-# set -x
-# NAME=`mvn help:evaluate -Dexpression=project.name | grep "^[^\[]"`
-# set +x
-
-# echo 'The following complex command behaves similarly to the previous one but'
-# echo 'extracts the value of the <version/> element within <project/> instead.'
-# set -x
-# VERSION=`mvn help:evaluate -Dexpression=project.version | grep "^[^\[]"`
-# set +x
-
-# echo 'The following command runs and outputs the execution of your Java'
-# echo 'application (which Jenkins built using Maven) to the Jenkins UI.'
-# set -x
-# java -jar target/${NAME}-${VERSION}.jar
-set -x
-mvn spring-boot:run &
-sleep 1
-echo $! > .pidfile
-sleep 30
-set +x
