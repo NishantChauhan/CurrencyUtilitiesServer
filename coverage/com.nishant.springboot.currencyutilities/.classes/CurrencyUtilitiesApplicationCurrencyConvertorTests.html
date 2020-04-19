@@ -1,0 +1,145 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: CurrencyUtilitiesApplicationCurrencyConvertorTests</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.nishant.springboot.currencyutilities</a> ]
+</div>
+
+<h1>Coverage Summary for Class: CurrencyUtilitiesApplicationCurrencyConvertorTests (com.nishant.springboot.currencyutilities)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CurrencyUtilitiesApplicationCurrencyConvertorTests</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/ 3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/ 26)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.nishant.springboot.currencyutilities;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import com.nishant.springboot.currencyutilities.local.commonutils.RateUtils;
+<i>4</i>&nbsp;import com.nishant.springboot.currencyutilities.restcontrollers.feignclients.CurrencyClientInterface;
+<i>5</i>&nbsp;import org.junit.jupiter.api.Test;
+<i>6</i>&nbsp;import org.mockito.Mockito;
+<i>7</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>8</i>&nbsp;import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+<i>9</i>&nbsp;import org.springframework.boot.test.context.SpringBootTest;
+<i>10</i>&nbsp;import org.springframework.boot.test.mock.mockito.MockBean;
+<i>11</i>&nbsp;import org.springframework.http.MediaType;
+<i>12</i>&nbsp;import org.springframework.test.web.servlet.MockMvc;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+<i>15</i>&nbsp;import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+<i>16</i>&nbsp;
+<i>17</i>&nbsp;@SpringBootTest
+<i>18</i>&nbsp;@AutoConfigureMockMvc
+<b class="fc"><i>19</i>&nbsp;class CurrencyUtilitiesApplicationCurrencyConvertorTests {</b>
+<i>20</i>&nbsp;    @Autowired
+<i>21</i>&nbsp;    private MockMvc mockMvc;
+<i>22</i>&nbsp;
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;    @MockBean
+<i>25</i>&nbsp;    private CurrencyClientInterface clientInterface;
+<i>26</i>&nbsp;
+<i>27</i>&nbsp;    @Test
+<i>28</i>&nbsp;    public void shouldConvert1000CADtoINR() throws Exception {
+<b class="fc"><i>29</i>&nbsp;        Mockito.when(clientInterface.getLatestRates(System.getenv(&quot;API_KEY&quot;))).thenReturn(RateUtils.getLatestRates());</b>
+<b class="fc"><i>30</i>&nbsp;        this.mockMvc.perform(get(&quot;/api/v1/currency/converter/convert&quot;)</b>
+<b class="fc"><i>31</i>&nbsp;                .param(&quot;Amount&quot;, &quot;1000&quot;)</b>
+<b class="fc"><i>32</i>&nbsp;                .param(&quot;From&quot;, &quot;CAD&quot;)</b>
+<b class="fc"><i>33</i>&nbsp;                .param(&quot;To&quot;, &quot;INR&quot;)</b>
+<b class="fc"><i>34</i>&nbsp;        ).andExpect(status().isOk())</b>
+<b class="fc"><i>35</i>&nbsp;                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))</b>
+<b class="fc"><i>36</i>&nbsp;                .andExpect(jsonPath(&quot;$.from&quot;).value(&quot;CAD&quot;))</b>
+<b class="fc"><i>37</i>&nbsp;                .andExpect(jsonPath(&quot;$.to&quot;).value(&quot;INR&quot;))</b>
+<b class="fc"><i>38</i>&nbsp;                .andExpect(jsonPath(&quot;$.amount&quot;).value(1000))</b>
+<b class="fc"><i>39</i>&nbsp;                .andExpect(jsonPath(&quot;$.rateAsOf&quot;).isNotEmpty())</b>
+<b class="fc"><i>40</i>&nbsp;                .andExpect(jsonPath(&quot;$.conversionRate&quot;).value(53.49008750820958))</b>
+<b class="fc"><i>41</i>&nbsp;                .andExpect(jsonPath(&quot;$.result&quot;).value(53490.08750820958))</b>
+<b class="fc"><i>42</i>&nbsp;                .andExpect(jsonPath(&quot;$.responseStatus.status&quot;).value(&quot;Success&quot;))</b>
+<i>43</i>&nbsp;        ;
+<i>44</i>&nbsp;    }
+<i>45</i>&nbsp;
+<i>46</i>&nbsp;    @Test
+<i>47</i>&nbsp;    public void shouldReturnErrorForCADAtoINRConversion() throws Exception {
+<b class="fc"><i>48</i>&nbsp;        Mockito.when(clientInterface.getLatestRates(System.getenv(&quot;API_KEY&quot;))).thenReturn(RateUtils.getLatestRates());</b>
+<i>49</i>&nbsp;        //noinspection SpellCheckingInspection
+<b class="fc"><i>50</i>&nbsp;        this.mockMvc</b>
+<b class="fc"><i>51</i>&nbsp;                .perform(get(&quot;/api/v1/currency/converter/convert&quot;)</b>
+<b class="fc"><i>52</i>&nbsp;                        .param(&quot;Amount&quot;, &quot;1000&quot;)</b>
+<b class="fc"><i>53</i>&nbsp;                        .param(&quot;From&quot;, &quot;CADA&quot;)</b>
+<b class="fc"><i>54</i>&nbsp;                        .param(&quot;To&quot;, &quot;INR&quot;)</b>
+<i>55</i>&nbsp;                )
+<b class="fc"><i>56</i>&nbsp;                .andExpect(status().isOk())</b>
+<b class="fc"><i>57</i>&nbsp;                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))</b>
+<b class="fc"><i>58</i>&nbsp;                .andExpect(jsonPath(&quot;$.responseStatus.status&quot;).value(&quot;Failed&quot;))</b>
+<b class="fc"><i>59</i>&nbsp;                .andExpect(jsonPath(&quot;$.responseStatus.errorCode&quot;).value(&quot;Invalid Input&quot;))</b>
+<b class="fc"><i>60</i>&nbsp;                .andExpect(jsonPath(&quot;$.responseStatus.errorDescription&quot;).value(&quot;Source Currency &#39;CADA&#39; is not supported&quot;));</b>
+<i>61</i>&nbsp;    }
+<i>62</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-03-28 08:53</div>
+</div>
+</body>
+</html>

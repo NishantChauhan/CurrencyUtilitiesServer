@@ -1,0 +1,114 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: WebConfig</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">com.nishant.springboot.currencyutilities.configuration</a> ]
+</div>
+
+<h1>Coverage Summary for Class: WebConfig (com.nishant.springboot.currencyutilities.configuration)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WebConfig</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WebConfig$$EnhancerBySpringCGLIB$$282202e1</td>
+  </tr>
+<tr>
+  <td class="name"><strong>total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/ 2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/ 4)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package com.nishant.springboot.currencyutilities.configuration;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import org.springframework.beans.factory.annotation.Value;
+<i>4</i>&nbsp;import org.springframework.context.annotation.Configuration;
+<i>5</i>&nbsp;import org.springframework.web.servlet.config.annotation.CorsRegistry;
+<i>6</i>&nbsp;import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+<i>7</i>&nbsp;
+<i>8</i>&nbsp;@Configuration
+<b class="fc"><i>9</i>&nbsp;public class WebConfig implements WebMvcConfigurer {</b>
+<i>10</i>&nbsp;
+<i>11</i>&nbsp;    @Value(value = &quot;${currency.api.allowed-origins}&quot;)
+<i>12</i>&nbsp;    String allowedOrigins;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;    @Override
+<i>15</i>&nbsp;    public void addCorsMappings(CorsRegistry registry) {
+<b class="fc"><i>16</i>&nbsp;        registry.addMapping(&quot;/api/**&quot;)</b>
+<b class="fc"><i>17</i>&nbsp;                .allowedOrigins(allowedOrigins.split(&quot;,&quot;))</b>
+<b class="fc"><i>18</i>&nbsp;                .allowedMethods(&quot;GET&quot;);</b>
+<i>19</i>&nbsp;    }
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2020-03-28 08:53</div>
+</div>
+</body>
+</html>
