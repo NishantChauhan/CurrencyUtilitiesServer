@@ -35,4 +35,14 @@ class CurrencyUtilitiesApplicationRatesControllerTests {
                 .andExpect(jsonPath("$.rates.CAD").isNumber())
                 .andExpect(jsonPath("$.rates.INR").isNumber());
     }
+
+    @Test
+    public void shouldReturnAllSupportedCurrencies() throws Exception {
+        Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
+        this.mockMvc.perform(get("/api/v1/currency/rates/supportedCurrencies"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[66].currencySymbol").value("INR"))
+                .andExpect(jsonPath("$.[27].currencySymbol").value("CAD"))
+                .andExpect(jsonPath("$.[149].currencySymbol").value("USD"));
+    }
 }
