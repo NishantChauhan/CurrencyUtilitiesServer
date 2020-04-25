@@ -11,6 +11,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.net.ConnectException;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -53,10 +55,42 @@ class CurrencyUtilitiesApplicationCurrencyConverterTests {
                         .param("From", "CADA")
                         .param("To", "INR")
                 )
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.responseStatus.status").value("Failed"))
-                .andExpect(jsonPath("$.responseStatus.errorCode").value("Invalid Input"))
-                .andExpect(jsonPath("$.responseStatus.errorDescription").value("Source Currency 'CADA' is not supported"));
+                .andExpect(jsonPath("$.status").value("Failed"))
+                .andExpect(jsonPath("$.errorCode").value("Invalid Input"))
+                .andExpect(jsonPath("$.errorDescription").value("Currency 'CADA' is not supported"));
+    }
+
+    @Test
+    public void shouldReturnErrorForInvalidAccessKey() throws Exception {
+        Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getAccessKeyError());
+        this.mockMvc
+                .perform(get("/api/v1/currency/converter/convert")
+                        .param("Amount", "1000")
+                        .param("From", "CAD")
+                        .param("To", "INR")
+                )
+                .andExpect(status().is5xxServerError())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("Failed"))
+                .andExpect(jsonPath("$.errorCode").value("Validation Error occurred while invoking Currency Provider API"))
+                .andExpect(jsonPath("$.errorDescription").value("invalid_access_key"));
+    }
+
+    @Test
+    public void shouldReturnErrorWhenProvideAPIisUnavailable() throws Exception {
+        Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenThrow(new RuntimeException(new ConnectException()));
+        this.mockMvc
+                .perform(get("/api/v1/currency/converter/convert")
+                        .param("Amount", "1000")
+                        .param("From", "CAD")
+                        .param("To", "INR")
+                )
+                .andExpect(status().is5xxServerError())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value("Failed"))
+                .andExpect(jsonPath("$.errorCode").value("Error while accessing Currency API"))
+                .andExpect(jsonPath("$.errorDescription").value("Unable to connect to Currency Provider API"));
     }
 }

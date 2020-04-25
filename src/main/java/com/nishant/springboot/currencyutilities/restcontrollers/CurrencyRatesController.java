@@ -1,5 +1,6 @@
 package com.nishant.springboot.currencyutilities.restcontrollers;
 
+import com.nishant.springboot.currencyutilities.configuration.common.constants.CurrencyAPICommonUtilities;
 import com.nishant.springboot.currencyutilities.model.Currency;
 import com.nishant.springboot.currencyutilities.model.Rates;
 import com.nishant.springboot.currencyutilities.restcontrollers.feignclients.CurrencyClientInterface;
@@ -8,9 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 
 @RestController
@@ -31,15 +30,6 @@ public class CurrencyRatesController {
     @GetMapping(value = "/supportedCurrencies", produces = MediaType.APPLICATION_JSON_VALUE)
     public Set<Currency> getSupportedCurrencies() {
         Rates rates = currencyFeignClient.getLatestRates(System.getenv("API_KEY"));
-        Set<Currency> supportedCurrencies = new TreeSet<>();
-        if(rates !=null && rates.getRates()!=null && !rates.getRates().isEmpty()){
-            Map<String, Double> currencyRates = rates.getRates();
-            currencyRates.forEach((currencyName,currencyRate)->{
-                Currency currency = new Currency(currencyName,currencyName);
-                supportedCurrencies.add(currency);
-            });
-        }
-        return supportedCurrencies;
+        return CurrencyAPICommonUtilities.getSupportedCurrencies(rates);
     }
-
 }

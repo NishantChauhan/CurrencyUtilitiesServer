@@ -1,5 +1,6 @@
 package com.nishant.springboot.currencyutilities.model;
 
+import com.nishant.springboot.currencyutilities.model.errorhandling.CurrencyAPIErrorResponse;
 import lombok.Data;
 
 import java.util.Date;
@@ -12,6 +13,6 @@ public class Rates {
     private String base;
     private Date date;
     private Map<String, Double> rates;
-    private APIError error;
+    private CurrencyAPIErrorResponse error;
 
 }

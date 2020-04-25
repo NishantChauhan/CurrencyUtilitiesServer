@@ -1,9 +1,14 @@
 package com.nishant.springboot.currencyutilities.restcontrollers;
 
-import com.nishant.springboot.currencyutilities.model.APIError;
+import com.nishant.springboot.currencyutilities.configuration.common.constants.CurrencyAPICommonUtilities;
+import com.nishant.springboot.currencyutilities.model.Currency;
 import com.nishant.springboot.currencyutilities.model.CurrencyConversionResponse;
 import com.nishant.springboot.currencyutilities.model.Rates;
 import com.nishant.springboot.currencyutilities.model.ResponseStatus;
+import com.nishant.springboot.currencyutilities.model.errorhandling.CurrencyAPIErrorResponse;
+import com.nishant.springboot.currencyutilities.model.errorhandling.CurrencyAPIInputValidationException;
+import com.nishant.springboot.currencyutilities.model.errorhandling.CurrencyAPIServerValidationException;
+import com.nishant.springboot.currencyutilities.model.errorhandling.CurrencyAPITechnicalException;
 import com.nishant.springboot.currencyutilities.restcontrollers.feignclients.CurrencyClientInterface;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
+import static com.nishant.springboot.currencyutilities.configuration.common.constants.CurrencyAPICommonConstants.FLOATING_POINT_REGEX;
 
 @RestController
 @RequestMapping("/api/v1/currency/converter/")
@@ -27,87 +34,62 @@ public class CurrencyConverterController {
     }
 
     @GetMapping(value = "/convert", produces = MediaType.APPLICATION_JSON_VALUE)
-    public CurrencyConversionResponse getConversionRate(@RequestParam("Amount") String amount, @RequestParam("From") String from, @RequestParam("To") String to) {
-        String key = System.getenv("API_KEY");
+    public CurrencyConversionResponse getConversionRate(@RequestParam("Amount") String amount, @RequestParam("From") String from, @RequestParam("To") String to)
+            throws CurrencyAPITechnicalException, CurrencyAPIInputValidationException, CurrencyAPIServerValidationException {
 
-        Double result = 0.0;
-        Double amountValue = 0.0;
-        Date rateAsOf = new Date();
-        Double conversionRate = 0.0;
+        validateAmount(amount);
 
-        Rates apiRates;
+        Rates apiRates = getRatesFromAPI();
 
-        ResponseStatus status = new ResponseStatus();
-        CurrencyConversionResponse response;
-
-        try {
-            apiRates = currencyFeignClient.getLatestRates(key);
-        } catch (Exception e) {
-            status.setStatus("Failed");
-            status.setErrorCode("Error while accessing Currency API");
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            status.setErrorDescription(sw.toString());
-            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
-            return response;
-        }
-        if (apiRates == null) {
-            status.setStatus("Failed");
-            status.setErrorCode("Error while accessing Currency API");
-            status.setErrorDescription("No Response from Currency API");
-            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
-            return response;
-        }
-        APIError error = apiRates.getError();
-        if (error != null) {
-            status.setStatus("Failed");
-            status.setErrorCode(error.getType());
-            status.setErrorDescription(error.getInfo());
-            response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
-            return response;
-        }
-        status.setStatus("Success");
+        validateCurrency(from, apiRates);
+        validateCurrency(to, apiRates);
 
         Map<String, Double> rates = apiRates.getRates();
 
-
+        Double amountValue = Double.parseDouble(amount);
         Double fromRate = rates.get(from);
         Double toRate = rates.get(to);
-        rateAsOf = apiRates.getDate();
+        Date rateAsOf = apiRates.getDate();
 
+        Double result = amountValue * toRate / fromRate;
+        Double conversionRate = toRate / fromRate;
+
+        ResponseStatus successStatus = new ResponseStatus("Success", null, null);
+        return new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, successStatus);
+    }
+
+    private Rates getRatesFromAPI() throws CurrencyAPITechnicalException, CurrencyAPIServerValidationException {
+        Rates apiRates;
+        String key = System.getenv("API_KEY");
         try {
-            amountValue = Double.parseDouble(amount);
-        } catch (NumberFormatException nfe) {
-            status.setStatus("Failed");
-            status.setErrorCode("Invalid Input");
-            status.setErrorDescription("Amount '" + amount + "' not valid");
-            // TODO Throw proper HTTP Error Code
-        }
-        try {
-            result = amountValue * toRate / fromRate;
-            conversionRate = toRate / fromRate;
+            apiRates = currencyFeignClient.getLatestRates(key);
         } catch (Exception e) {
-
-            result = 0.0;
-            String errorCode = null;
-            String errorDesc = null;
-
-            if (toRate == null || toRate == 0.0) {
-                errorCode = "Invalid Input";
-                errorDesc = "Target Currency '" + to + "' is not supported";
-            }
-
-            if (fromRate == null || fromRate == 0.0) {
-                errorCode = "Invalid Input";
-                errorDesc = "Source Currency '" + from + "' is not supported";
-            }
-
-            status.setStatus("Failed");
-            status.setErrorCode(errorCode);
-            status.setErrorDescription(errorDesc);
+            throw new CurrencyAPITechnicalException(e);
         }
-        response = new CurrencyConversionResponse(from, to, rateAsOf, amountValue, conversionRate, result, status);
-        return response;
+        if (apiRates == null) {
+            throw new CurrencyAPITechnicalException("No Response from Currency API");
+        }
+        if (apiRates.getError() != null) {
+            CurrencyAPIErrorResponse error = apiRates.getError();
+            throw new CurrencyAPIServerValidationException(new ResponseStatus("Failed", error.getType(), error.getInfo()));
+        }
+        return apiRates;
+    }
+
+    private void validateCurrency(String currencySymbol, Rates rates) throws CurrencyAPIInputValidationException {
+        Set<Currency> supportedCurrencies = CurrencyAPICommonUtilities.getSupportedCurrencies(rates);
+        boolean matchFound = supportedCurrencies.stream().map(Currency::getCurrencySymbol).anyMatch(t -> t.equals(currencySymbol));
+        if (!matchFound) {
+            ResponseStatus errorResponse = new ResponseStatus("Failed", "Invalid Input", "Currency '" + currencySymbol + "' is not supported");
+            throw new CurrencyAPIInputValidationException(errorResponse);
+
+        }
+    }
+
+    private void validateAmount(String amount) throws CurrencyAPIInputValidationException {
+        if (amount == null || "".equals(amount) || !Pattern.matches(FLOATING_POINT_REGEX, amount)) {
+            ResponseStatus errorResponse = new ResponseStatus("Failed", "Invalid Input", "Amount '" + amount + "' not valid");
+            throw new CurrencyAPIInputValidationException(errorResponse);
+        }
     }
 }
