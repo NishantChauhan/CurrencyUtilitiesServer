@@ -15,4 +15,10 @@ public class RateUtils {
                 , Rates.class);
     }
 
+    public static Rates getAccessKeyError() throws FileNotFoundException {
+        return (new GsonBuilder().setDateFormat("yyyy-MM-dd")).create().fromJson(
+                new FileReader(ResourceUtils.getFile("classpath:samples/fixer/accessKeyError.json"))
+                , Rates.class);
+    }
+
 }
