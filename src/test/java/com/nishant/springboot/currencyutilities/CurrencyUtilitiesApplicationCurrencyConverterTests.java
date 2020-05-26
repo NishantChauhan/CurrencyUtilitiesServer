@@ -39,8 +39,8 @@ class CurrencyUtilitiesApplicationCurrencyConverterTests {
                 .andExpect(jsonPath("$.to").value("INR"))
                 .andExpect(jsonPath("$.amount").value(1000))
                 .andExpect(jsonPath("$.rateAsOf").isNotEmpty())
-                .andExpect(jsonPath("$.conversionRate").value(53.49008750820958))
-                .andExpect(jsonPath("$.result").value(53490.08750820958))
+                .andExpect(jsonPath("$.conversionRate").value(54.251032042461176))
+                .andExpect(jsonPath("$.result").value(54251.032042461176))
                 .andExpect(jsonPath("$.responseStatus.status").value("Success"))
         ;
     }

@@ -28,8 +28,6 @@ class CurrencyUtilitiesApplicationRatesControllerTests {
         Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
         this.mockMvc.perform(get("/api/v1/currency/rates/latest"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.timestamp").isNumber())
                 .andExpect(jsonPath("$.base").isString())
                 .andExpect(jsonPath("$.date").isNotEmpty())
                 .andExpect(jsonPath("$.rates.CAD").isNumber())
@@ -41,8 +39,8 @@ class CurrencyUtilitiesApplicationRatesControllerTests {
         Mockito.when(clientInterface.getLatestRates(System.getenv("API_KEY"))).thenReturn(RateUtils.getLatestRates());
         this.mockMvc.perform(get("/api/v1/currency/rates/supportedCurrencies"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.[66].currencySymbol").value("INR"))
-                .andExpect(jsonPath("$.[27].currencySymbol").value("CAD"))
-                .andExpect(jsonPath("$.[149].currencySymbol").value("USD"));
+                .andExpect(jsonPath("$.[3].currencySymbol").value("CAD"))
+                .andExpect(jsonPath("$.[14].currencySymbol").value("INR"))
+                .andExpect(jsonPath("$.[30].currencySymbol").value("USD"));
     }
 }
