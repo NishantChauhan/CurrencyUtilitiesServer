@@ -1,4 +1,6 @@
+![Continuous Integration](https://github.com/NishantChauhan/CurrencyUtilitiesServer/workflows/Continuous%20Integration/badge.svg) ![Continuous Deployment](https://github.com/NishantChauhan/CurrencyUtilitiesServer/workflows/Continuous%20Deployment/badge.svg)
 # Currency Utilities Server
+
 This spring boot project provides restful endpoints to the Angular Front End for fetching details from the currency API.
 
 ## Features
