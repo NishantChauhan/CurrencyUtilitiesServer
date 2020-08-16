@@ -1,6 +1,8 @@
 ![Continuous Integration](https://github.com/NishantChauhan/CurrencyUtilitiesServer/workflows/Continuous%20Integration/badge.svg) ![Continuous Deployment](https://github.com/NishantChauhan/CurrencyUtilitiesServer/workflows/Continuous%20Deployment/badge.svg)
 # Currency Utilities Server
 
+Hosted on Heroku --> [Currency Utilities](https://currency-utility-app.herokuapp.com/currency-convertor)
+
 This spring boot project provides restful endpoints to the Angular Front End for fetching details from the currency API.
 
 ## Features
